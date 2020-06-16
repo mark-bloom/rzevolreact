@@ -1,5 +1,4 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
 import Grid from '@material-ui/core/Grid';
 import { Container } from '@material-ui/core';
@@ -29,25 +28,25 @@ function Menu() {
         <Container maxWidth="lg" className={classes.menucontainer}>
           <Grid container spacing={3}>
             <Grid item xs={12}>
-              <Paper className={classes.paper}>xs=12</Paper>
+              <Paper className={classes.paper}>menu xs=12</Paper>
             </Grid>
             <Grid item xs={6}>
-              <Paper className={classes.paper}>xs=6</Paper>
+              <Paper className={classes.paper}>menu xs=6</Paper>
             </Grid>
             <Grid item xs={6}>
-              <Paper className={classes.paper}>xs=6</Paper>
+              <Paper className={classes.paper}>menu xs=6</Paper>
             </Grid>
             <Grid item xs={3}>
-              <Paper className={classes.paper}>xs=3</Paper>
+              <Paper className={classes.paper}>menu xs=3</Paper>
             </Grid>
             <Grid item xs={3}>
-              <Paper className={classes.paper}>xs=3</Paper>
+              <Paper className={classes.paper}>menu xs=3</Paper>
             </Grid>
             <Grid item xs={3}>
-              <Paper className={classes.paper}>xs=3</Paper>
+              <Paper className={classes.paper}>menu xs=3</Paper>
             </Grid>
             <Grid item xs={3}>
-              <Paper className={classes.paper}>xs=3</Paper>
+              <Paper className={classes.paper}>menu xs=3</Paper>
             </Grid>
           </Grid>
         </Container>

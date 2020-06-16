@@ -1,58 +1,239 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
-import Grid from '@material-ui/core/Grid';
-import { Container } from '@material-ui/core';
+import './Game.css';
+import { Container , Button , Input} from '@material-ui/core';
+import { withStyles } from '@material-ui/core/styles';
+import OutlinedInput from '@material-ui/core/OutlinedInput';
+import InputAdornment from '@material-ui/core/InputAdornment';
 
-import { makeStyles } from '@material-ui/core/styles';
-import Paper from '@material-ui/core/Paper';
-const useStyles = makeStyles((theme) => ({
-  root: {
-    flexGrow: 1,
-  },
-  paper: {
-    padding: theme.spacing(2),
-    textAlign: 'center',
-    color: 'white',
-    background: '#424242',
-  },
-  gamecontainer: {
-    background: '#333333',
-    borderRadius: '4px',
-  },
-}));
+var CELL_SIZE = 20;
+var WIDTH = 600;
+var HEIGHT = 600;
 
-function Game() {
-  const classes = useStyles();
-  return (
-    <div className="Game">
-        <Container maxWidth="lg" className={classes.gamecontainer}>
-          <Grid container spacing={3}>
-            <Grid item xs={12}>
-              <Paper className={classes.paper}>xs=12</Paper>
-            </Grid>
-            <Grid item xs={6}>
-              <Paper className={classes.paper}>xs=6</Paper>
-            </Grid>
-            <Grid item xs={6}>
-              <Paper className={classes.paper}>xs=6</Paper>
-            </Grid>
-            <Grid item xs={3}>
-              <Paper className={classes.paper}>xs=3</Paper>
-            </Grid>
-            <Grid item xs={3}>
-              <Paper className={classes.paper}>xs=3</Paper>
-            </Grid>
-            <Grid item xs={3}>
-              <Paper className={classes.paper}>xs=3</Paper>
-            </Grid>
-            <Grid item xs={3}>
-              <Paper className={classes.paper}>xs=3</Paper>
-            </Grid>
-          </Grid>
-        </Container>
-    </div>
-  );
+const styles = theme => ({
+    root: {
+       flexGrow: 1,
+     },
+});
+
+class Cell extends React.Component {
+
+    render() {
+        const { x, y } = this.props;
+        return (
+            <div className="Cell" style={{
+                left: `${CELL_SIZE * x + 1}px`,
+                top: `${CELL_SIZE * y + 1}px`,
+                width: `${CELL_SIZE - 1}px`,
+                height: `${CELL_SIZE - 1}px`,
+            }} />
+        );
+    }
 }
 
-export default Game;
+
+class Game extends React.Component {
+
+    constructor() {
+        super();
+        this.rows = HEIGHT / CELL_SIZE;
+        this.cols = 30;
+
+        this.board = this.makeEmptyBoard();
+    }
+
+    state = {
+        cells: [],
+        isRunning: false,
+        interval: 100,
+    }
+
+    makeEmptyBoard() {
+        let board = [];
+        for (let y = 0; y < this.rows; y++) {
+            board[y] = [];
+            for (let x = 0; x < this.cols; x++) {
+                board[y][x] = false;
+            }
+        }
+
+        return board;
+    }
+
+    getElementOffset() {
+        const rect = this.boardRef.getBoundingClientRect();
+        const doc = document.documentElement;
+
+        return {
+            x: (rect.left + window.pageXOffset) - doc.clientLeft,
+            y: (rect.top + window.pageYOffset) - doc.clientTop,
+        };
+    }
+
+    makeCells() {
+        let cells = [];
+        for (let y = 0; y < this.rows; y++) {
+            for (let x = 0; x < this.cols; x++) {
+                if (this.board[y][x]) {
+                    cells.push({ x, y });
+                }
+            }
+        }
+
+        return cells;
+    }
+
+    handleClick = (event) => {
+
+        const elemOffset = this.getElementOffset();
+        const offsetX = event.clientX - elemOffset.x;
+        const offsetY = event.clientY - elemOffset.y;
+        
+        const x = Math.floor(offsetX / CELL_SIZE);
+        const y = Math.floor(offsetY / CELL_SIZE);
+
+        if (x >= 0 && x <= this.cols && y >= 0 && y <= this.rows) {
+            this.board[y][x] = !this.board[y][x];
+        }
+
+        this.setState({ cells: this.makeCells() });
+    }
+
+    runGame = () => {
+        this.setState({ isRunning: true });
+        this.runIteration();
+    }
+
+    stopGame = () => {
+        this.setState({ isRunning: false });
+        if (this.timeoutHandler) {
+            window.clearTimeout(this.timeoutHandler);
+            this.timeoutHandler = null;
+        }
+    }
+
+    runIteration() {
+        let newBoard = this.makeEmptyBoard();
+
+        for (let y = 0; y < this.rows; y++) {
+            for (let x = 0; x < this.cols; x++) {
+                let neighbors = this.calculateNeighbors(this.board, x, y);
+                if (this.board[y][x]) {
+                    if (neighbors === 2 || neighbors === 3) {
+                        newBoard[y][x] = true;
+                    } else {
+                        newBoard[y][x] = false;
+                    }
+                } else {
+                    if (!this.board[y][x] && neighbors === 3) {
+                        newBoard[y][x] = true;
+                    }
+                }
+            }
+        }
+
+        this.board = newBoard;
+        this.setState({ cells: this.makeCells() });
+
+        this.timeoutHandler = window.setTimeout(() => {
+            this.runIteration();
+        }, this.state.interval);
+    }
+
+    /**
+     * Calculate the number of neighbors at point (x, y)
+     * @param {Array} board 
+     * @param {int} x 
+     * @param {int} y 
+     */
+    calculateNeighbors(board, x, y) {
+        let neighbors = 0;
+        const dirs = [[-1, -1], [-1, 0], [-1, 1], [0, 1], [1, 1], [1, 0], [1, -1], [0, -1]];
+        for (let i = 0; i < dirs.length; i++) {
+            const dir = dirs[i];
+            let y1 = y + dir[0];
+            let x1 = x + dir[1];
+
+            if (x1 >= 0 && x1 < this.cols && y1 >= 0 && y1 < this.rows && board[y1][x1]) {
+                neighbors++;
+            }
+        }
+
+        return neighbors;
+    }
+
+    handleIntervalChange = (event) => {
+        this.setState({ interval: event.target.value });
+    }
+
+    handleSizeChange = (event) => {
+        this.setState({ interval: event.target.value });
+    }
+
+    handleClear = () => {
+        this.board = this.makeEmptyBoard();
+        this.setState({ cells: this.makeCells() });
+    }
+
+    handleRandom = () => {
+        for (let y = 0; y < this.rows; y++) {
+            for (let x = 0; x < this.cols; x++) {
+                this.board[y][x] = (Math.random() >= 0.5);
+            }
+        }
+
+        this.setState({ cells: this.makeCells() });
+    }
+
+    render() {
+        const { cells, interval, isRunning } = this.state;
+        return (
+            <div className="GameDiv">
+                <div className="Board"
+                    style={{ width: WIDTH, height: HEIGHT, backgroundSize: `${CELL_SIZE}px ${CELL_SIZE}px`}}
+                    onClick={this.handleClick}
+                    ref={(n) => { this.boardRef = n; }}>
+
+                    {cells.map(cell => (
+                        <Cell x={cell.x} y={cell.y} key={`${cell.x},${cell.y}`}/>
+                    ))}
+                </div>
+                <Container className="ControlsContainer">
+                    <div className="controls">
+                        Update every <Input value={this.state.interval} label="Standard" onChange={this.handleIntervalChange} width={10} /> msec
+                        {isRunning ?
+                            <Button variant="contained" color="primary" className="button" onClick={this.stopGame}>Stop</Button> :
+                            <Button variant="contained" color="primary" className="button" onClick={this.runGame}>Run</Button>
+                        }
+                        <Button variant="contained" color="primary" className="button" onClick={this.handleRandom}>Random</Button>
+                        <Button variant="contained" color="primary" className="button" onClick={this.handleClear}>Clear</Button>
+                        Board is <Input value={this.state.size} onChange={this.handleSizeChange} label="Standard" width={20} /> cells w/h
+                        <OutlinedInput
+                            id="outlined-adornment-weight"
+                            value={this.state.interval}
+                            onChange={this.handleIntervalChange}
+                            endAdornment={<InputAdornment position="end">ms</InputAdornment>}
+                            aria-describedby="outlined-weight-helper-text"
+                            inputProps={{
+                            'aria-label': 'weight',
+                            }}
+                            labelWidth={0}
+                        />
+                        <OutlinedInput
+                            id="outlined-adornment-weight"
+                            value={this.state.size}
+                            onChange={this.handleSizeChange}
+                            endAdornment={<InputAdornment position="cells">ms</InputAdornment>}
+                            aria-describedby="outlined-weight-helper-text"
+                            inputProps={{
+                            'aria-label': 'weight',
+                            }}
+                            labelWidth={0}
+                        />
+                    </div>
+                </Container>
+            </div>
+        );
+    }
+}
+
+export default withStyles(styles)(Game);

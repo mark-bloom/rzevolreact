@@ -1,0 +1,41 @@
+.GameDiv {
+    background: #444;
+    padding: 20px 20px 10px 20px;
+    border-radius: 6px;
+    display: inline-block
+}
+
+.Board {
+    position: relative;
+    margin: auto;
+    /* margin-bottom: 20px; */
+    background-color: #000;
+    background-image:
+        linear-gradient(#333 1px, transparent 1px),
+        linear-gradient(90deg, #333 1px, transparent 1px);
+}
+
+.Cell {
+    background: #ccc;
+    position: absolute;
+}
+
+.button {
+    margin-left: 10px;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.ControlsContainer {
+    background: #777;
+    margin-top: 20px;
+    padding: 20px;
+    border-radius: 4px;
+    display: inline-block;
+    font-weight: 500;
+    display: flex;
+}
+
+.controls {
+    
+}
