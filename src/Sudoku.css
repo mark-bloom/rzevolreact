@@ -1,0 +1,37 @@
+.sudoku-board {
+    overflow: hidden;
+    cursor: pointer;
+    padding-left: 40px;
+    padding-right: 40px;
+}
+
+.sudoku-row {
+    display: flex;
+    justify-content: center;
+}
+
+.sudoku-cell {
+    width: 20px;
+    height: 20px;
+    padding-bottom: 1px;
+    padding-right: 1px;
+    border-bottom: 1px solid;
+    border-right: 1px solid;
+    flex: 0 0 auto;
+    position: relative;
+    box-sizing: border-box;
+    background: #ccc;
+    border-color: #666;
+}
+
+.sudoku-cell-u {
+    padding-top: 1px;
+    border-top: 1px solid;
+    border-color: #666;
+}
+
+.sudoku-cell-l {
+    padding-left: 1px;
+    border-left: 1px solid;
+    border-color: #666;
+}
