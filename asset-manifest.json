@@ -1,0 +1,23 @@
+{
+  "files": {
+    "main.css": "/rzevolreact/static/css/main.a4392227.chunk.css",
+    "main.js": "/rzevolreact/static/js/main.31963e68.chunk.js",
+    "main.js.map": "/rzevolreact/static/js/main.31963e68.chunk.js.map",
+    "runtime-main.js": "/rzevolreact/static/js/runtime-main.25cf71ab.js",
+    "runtime-main.js.map": "/rzevolreact/static/js/runtime-main.25cf71ab.js.map",
+    "static/js/2.27ab0b01.chunk.js": "/rzevolreact/static/js/2.27ab0b01.chunk.js",
+    "static/js/2.27ab0b01.chunk.js.map": "/rzevolreact/static/js/2.27ab0b01.chunk.js.map",
+    "index.html": "/rzevolreact/index.html",
+    "precache-manifest.5f04852d76a1a6c77fcf32f34f712ad4.js": "/rzevolreact/precache-manifest.5f04852d76a1a6c77fcf32f34f712ad4.js",
+    "service-worker.js": "/rzevolreact/service-worker.js",
+    "static/css/main.a4392227.chunk.css.map": "/rzevolreact/static/css/main.a4392227.chunk.css.map",
+    "static/js/2.27ab0b01.chunk.js.LICENSE.txt": "/rzevolreact/static/js/2.27ab0b01.chunk.js.LICENSE.txt",
+    "static/media/logo.svg": "/rzevolreact/static/media/logo.5d5d9eef.svg"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.25cf71ab.js",
+    "static/js/2.27ab0b01.chunk.js",
+    "static/css/main.a4392227.chunk.css",
+    "static/js/main.31963e68.chunk.js"
+  ]
+}
