@@ -1,10 +1,10 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "321ede44b04d43b0666f958f7d4c9b66",
+    "revision": "24bc7839c63ffc0d90b9308fce811b59",
     "url": "/rzevolreact/index.html"
   },
   {
-    "revision": "b89d855e0dd48eae6bfd",
+    "revision": "aa4bbbb2c47ee66206be",
     "url": "/rzevolreact/static/css/main.a4392227.chunk.css"
   },
   {
@@ -16,8 +16,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/rzevolreact/static/js/2.e35e779d.chunk.js.LICENSE.txt"
   },
   {
-    "revision": "b89d855e0dd48eae6bfd",
-    "url": "/rzevolreact/static/js/main.58f33287.chunk.js"
+    "revision": "aa4bbbb2c47ee66206be",
+    "url": "/rzevolreact/static/js/main.9d21b492.chunk.js"
   },
   {
     "revision": "f318ad4f703be50ba725",

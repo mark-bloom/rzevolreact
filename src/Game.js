@@ -23,7 +23,7 @@ const DEFAULT_RGB = [125,125,125];
 const DEFAULT_HSL = [0,0,49];
 const DEFAULT_COLOR = "rgb(125,125,125)";
 
-const RANDOM_CHANCE = 0.10;
+const RANDOM_CHANCE = 0.05;
 const DEFAULT_SIZE = 30;
 const DEFAULT_INTERVAL = 250;
 
