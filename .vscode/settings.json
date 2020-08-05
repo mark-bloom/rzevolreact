@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "/subscriptions/6b12f7e2-e467-495a-bc25-ec896ca4e015/resourceGroups/rzevolreact/providers/Microsoft.Web/sites/rz-evol-react",
+    "appService.deploySubpath": "."
+}
