@@ -11,7 +11,8 @@ import TextField from '@material-ui/core/TextField';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import StopIcon from '@material-ui/icons/Stop';
 
-import FormGroup from '@material-ui/core/FormGroup';
+import Typography from '@material-ui/core/Typography';
+import Slider from '@material-ui/core/Slider';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 
@@ -24,18 +25,19 @@ const DEFAULT_COLOR = "rgb(125,125,125)";
 
 const RANDOM_CHANCE = 0.10;
 const DEFAULT_SIZE = 30;
-const DEFAULT_INTERVAL = 150;
+const DEFAULT_INTERVAL = 250;
 
 const DEFAULT_STD_DEV = 25;
 
 const MUTATE_BASE = 0.00025;
 const MUTATE_NEIGHBOUR = 0.003;
-const MUTATE_DEATH = 0.00005;
+// const MUTATE_DEATH = 0.00005;
+
+const MEAN_DEATH = 100;
 
 const DEFAULT_RGB_BIAS = 0.4;
 const DEFAULT_HSL_BIAS= 0.4;
 
-const COMBINED_MUTATE = false;
 const HSL_SPACE = false;
 const POLAR_RAND = true;
 
@@ -65,12 +67,44 @@ const styles = (theme) => ({
   radiobuttons: {
       color: 'white',
       borderColor: '#61DAFB',
+  },
+  slider: {
+      color: 'red',
+      borderColor: '#61DAFB',
   }
 });
 
+const marks = [
+    {
+        value: 50,
+        label: '50',
+    },
+    {
+        value: 250,
+        label: '250',
+    },
+    {
+        value: 450,
+        label: '450',
+    },
+    {
+        value: 550,
+        label: '∞',
+    },
+];
+  
+function valuetext(value) {
+    return `${value}`;
+}
+
+function valueLabelFormat(value) {
+    if (value === 550) return '∞';
+    else return value;
+}
+
 class Cell extends React.Component {
 
-    constructor(xVal, yVal, hslSpace) {
+    constructor(xVal, yVal) {
         super();
         this.x = xVal;
         this.y = yVal;
@@ -78,6 +112,8 @@ class Cell extends React.Component {
         this.colorDisplay = DEFAULT_COLOR;
         this.colorRGB = DEFAULT_RGB;
         this.colorHSL = DEFAULT_HSL;
+        this.deathTime = 0;
+        this.age = 0;
         this.data = 0;
     }
     
@@ -106,8 +142,8 @@ class Game extends React.Component {
             neighbourMutateChance: MUTATE_NEIGHBOUR,
             displayNeighbourChance: MUTATE_NEIGHBOUR*100,
 
-            deathChance: MUTATE_DEATH,
-            displayDeathChance: MUTATE_DEATH*100,
+            // deathChance: MUTATE_DEATH,
+            // displayDeathChance: MUTATE_DEATH*100,
 
             rgbMutate: DEFAULT_RGB_BIAS,
             displayRGBMutate: DEFAULT_RGB_BIAS,
@@ -115,9 +151,10 @@ class Game extends React.Component {
             hslMutate: DEFAULT_HSL_BIAS,
             displayHSLmutate: DEFAULT_HSL_BIAS,
 
-            combinedMutate: COMBINED_MUTATE,
             hslSpace: HSL_SPACE,
             polarRandom: POLAR_RAND,
+
+            meanDeathAge: MEAN_DEATH,
 
             board: this.makeEmptyBoard(DEFAULT_SIZE),
         }
@@ -127,30 +164,32 @@ class Game extends React.Component {
      * SIMULATION HANDLING
      */
     runIteration() {
-        const { board, size, mutateChance, deathChance, neighbourMutateChance } = this.state;
-
+        const { board, size, mutateChance, meanDeathAge, neighbourMutateChance } = this.state;
         for (let y = 0; y < size; y++) {
             for (let x = 0; x < size; x++) {
                 let mutationRoll = Math.random();
-                if(board[y][x].alive){ // if alive, chance to die
-                    if ( mutationRoll <= ( deathChance * 0.5 ) ) {
+                if(board[y][x].alive){ // if alive, age and check death
+                    if (meanDeathAge !== 550 && (board[y][x].age > board[y][x].deathTime)){ // 550 = ∞
                         this.killCell(y, x);
+                    } else {
+                        board[y][x].age++;
                     }
                 } else { // if dead, chance to wake and/or mutate
                     // get data about neighbours (numbers and colors)
                     let neighbourData = this.calculateneighbours(x, y);
                     let neighbourCount = neighbourData[0];
-
                     // neighbours impacts mutation chance
                     if ( mutationRoll <= mutateChance ) {
-                        this.wakeCell(x, y);
+                        this.wakeCell(y, x);
                     } else if ( mutationRoll <= (mutateChance + (neighbourMutateChance*neighbourCount)) ) {
-                        this.mutateCell(x, y, neighbourData);
+                        board[0][0].data = board[y][x].alive;
+                        board[0][1].data = board[y][x].x+ " " +board[y][x].y;
+                        this.mutateCell(y, x, neighbourData);
                     }
                 }
             }
         }
-        // this.handleRandom();
+        
         this.setState({ board });
 
         this.timeoutHandler = window.setTimeout(() => {
@@ -173,7 +212,6 @@ class Game extends React.Component {
                     : neighbourColors.push([x1,y1,board[y1][x1].colorRGB])
             }
         }
-
         return [neighbours,neighbourColors];
     }
 
@@ -197,39 +235,38 @@ class Game extends React.Component {
         this.setState( {board} );
     }
     
-    wakeCell(y,x) {
-        const { board } = this.state;
+    wakeCell(y, x) {
+        const { board, meanDeathAge } = this.state;
         board[y][x].alive = true;
+        board[y][x].age = 0;
+        board[y][x].deathTime = this.randn_bmDeath(meanDeathAge);
         board[y][x].colorDisplay = DEFAULT_COLOR;
         board[y][x].colorRGB = DEFAULT_RGB;
         board[y][x].colorHSL = DEFAULT_HSL;
-        this.setState( {board} );
     }
 
-    killCell(y,x) {
+    killCell(y, x) {
         const { board } = this.state;
         board[y][x].alive = false;
-        this.setState( {board} );
+        board[y][x].age = 0;
     }
 
-    mutateCell(x, y, neighbourData) {
-        const { board, combinedMutate, hslSpace } = this.state;
-        if ( combinedMutate ){ // if using combination of parent color
-            // CURRENTLY INACTIVE
-            return DEFAULT_COLOR;
-        } else { // if using color of single, randomly-selected parent
-            let selectedParent = neighbourData[1][Math.floor(Math.random()*neighbourData[0])];
-            let parentColor = selectedParent[2];
-            let newColor = this.mutateColor(parentColor);
-            if (hslSpace) { // using HSL color space
-                board[y][x].colorHSL = newColor; //not rounded
-                board[y][x].colorDisplay = "hsl("+Math.floor(newColor[0])+","+Math.floor(newColor[1])+"%,"+Math.floor(newColor[2])+"%)";
-            } else { // using RGB color space
-                board[y][x].colorRGB = newColor; //not rounded
-                board[y][x].colorDisplay = "rgb("+Math.floor(newColor[0])+","+Math.floor(newColor[1])+","+Math.floor(newColor[2])+")";
-            }
-            board[y][x].alive = true;
+    mutateCell(y, x, neighbourData) {
+        const { board, hslSpace, meanDeathAge } = this.state;
+        // using color of single, randomly-selected parent
+        let selectedParent = neighbourData[1][Math.floor(Math.random()*neighbourData[0])];
+        let parentColor = selectedParent[2];
+        let newColor = this.mutateColor(parentColor);
+        if (hslSpace) { // using HSL color space
+            board[y][x].colorHSL = newColor; //not rounded
+            board[y][x].colorDisplay = "hsl("+Math.floor(newColor[0])+","+Math.floor(newColor[1])+"%,"+Math.floor(newColor[2])+"%)";
+        } else { // using RGB color space
+            board[y][x].colorRGB = newColor; //not rounded
+            board[y][x].colorDisplay = "rgb("+Math.floor(newColor[0])+","+Math.floor(newColor[1])+","+Math.floor(newColor[2])+")";
         }
+        board[y][x].alive = true;
+        board[y][x].age = 0;
+        board[y][x].deathTime = this.randn_bmDeath(meanDeathAge);
     }
 
     mutateColor (inputColor) {
@@ -297,6 +334,21 @@ class Game extends React.Component {
         return (output - stdDev*skew);
       }
 
+    randn_bmDeath(meanDeath) {
+        let min = meanDeath * 0.5;
+        let max = meanDeath * 1.5;
+        let u = 0, v = 0;
+        while(u === 0) u = Math.random(); //Converting [0,1) to (0,1)
+        while(v === 0) v = Math.random();
+        let num = Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
+    
+        num = num / 10.0 + 0.5; // Translate to 0 -> 1
+        if (num > 1 || num < 0) num = this.randn_bmDeath(meanDeath); // resample between 0 and 1 if out of range
+        num *= max - min; // Stretch to fill range
+        num += min; // offset to min
+        return num;
+    }
+
     /**
      * BUTTON CLICK HANDLING
      */
@@ -344,12 +396,18 @@ class Game extends React.Component {
             neighbourMutateChance: MUTATE_NEIGHBOUR,
             displayNeighbourChance: MUTATE_NEIGHBOUR*100,
 
-            deathChance: MUTATE_DEATH,
-            displayDeathChance: MUTATE_DEATH*100,
+            // deathChance: MUTATE_DEATH,
+            // displayDeathChance: MUTATE_DEATH*100,
 
-            combinedMutate: COMBINED_MUTATE,
+            rgbMutate: DEFAULT_RGB_BIAS,
+            displayRGBMutate: DEFAULT_RGB_BIAS,
+
+            hslMutate: DEFAULT_HSL_BIAS,
+            displayHSLmutate: DEFAULT_HSL_BIAS,
+
             hslSpace: HSL_SPACE,
             polarRandom: POLAR_RAND,
+            meanDeathAge: MEAN_DEATH,
             
          });
 
@@ -419,7 +477,7 @@ class Game extends React.Component {
         this.setState({ displayDeathChance: deathVal });
         if(deathVal >= 0 && deathVal <= 100 && !isNaN(deathVal)) {
             this.stopGame();
-            this.setState({ deatheChance: deathVal/100 });
+            this.setState({ deathChance: deathVal/100 });
         }
     }
 
@@ -444,19 +502,14 @@ class Game extends React.Component {
     /**
      * SWITCH CHANGE HANDLING
      */
-    handleMutateSwitch = () => {
-        return 0;
+    handleDeathAgeChange = (event, value) => {
+        this.setState({ meanDeathAge: value });
     }
-    
+
     handleHSLSpaceSwitch = () => {
         const { hslSpace } = this.state;
-        if (hslSpace) { // convert to RGB
-            this.setState({ hslSpace: false });
-            this.handleClear();
-        } else { // convert to HSL
-            this.setState({ hslSpace: true });
-            this.handleClear();
-        }
+        hslSpace ? this.setState({ hslSpace: false }) : this.setState({ hslSpace: true });
+        this.handleClear();
     }
 
     handlePolarRandomSwitch = () => {
@@ -477,12 +530,12 @@ class Game extends React.Component {
             displaysize,
             displaymutateChance,
             displayNeighbourChance,
-            displayDeathChance,
+            // displayDeathChance,
             displayRGBMutate,
             displayHSLmutate,
-            combinedMutate,
             hslSpace,
             polarRandom,
+            meanDeathAge,
         } = this.state;
 
         return (
@@ -545,8 +598,6 @@ class Game extends React.Component {
                         </div>
                     ))}
                 </div>
-
-                {/* <p>{board[0][0].data + " " + board[0][1].data + " " + board[0][2].data}</p> */}
 
                 <div className="ControlsContainer" >
                     <Grid className="Controls1" container spacing={1} justify="center">
@@ -646,7 +697,7 @@ class Game extends React.Component {
                                     variant="outlined"
                                 />
                             </Grid>
-                            <Grid item>
+                            {/* <Grid item>
                                 <TextField 
                                     label="Death % [0,100]"
                                     id="outlined-adornment-deathChance"
@@ -655,7 +706,7 @@ class Game extends React.Component {
                                     value={displayDeathChance}
                                     variant="outlined"
                                 />
-                            </Grid>
+                            </Grid> */}
                             <Grid item>
                                 <TextField
                                     label="HSL Sat+ Bias [0,1]"
@@ -668,26 +719,36 @@ class Game extends React.Component {
                             </Grid>
                         </Grid>
                         <Grid className="Controls3" container spacing={1} justify="center">
-                            <FormGroup row>
-                                <FormControlLabel
-                                    control={<Switch  checked={combinedMutate} onChange={this.handleMutateSwitch}
-                                    name="mutateSwitch" />}
-                                    label="Combined Mutation NA"
-                                    className={clsx(classes.margin, classes.textField, classes.radiobuttons)}
+                            <Grid>
+                                <Typography id="discrete-slider" gutterBottom className={clsx(classes.radiobuttons)}>
+                                    Mean Death Age
+                                </Typography>
+                                <Slider
+                                    className={clsx(classes.slider)}
+                                    defaultValue={meanDeathAge}
+                                    valueLabelFormat={valueLabelFormat}
+                                    getAriaValueText={valuetext}
+                                    onChangeCommitted={this.handleDeathAgeChange}
+                                    aria-labelledby="discrete-slider-custom"
+                                    step={50}
+                                    valueLabelDisplay="auto"
+                                    marks={marks}
+                                    min={50}
+                                    max={550}
                                 />
-                                <FormControlLabel
-                                    control={<Switch checked={hslSpace} onChange={this.handleHSLSpaceSwitch}
-                                    name="HSLSpaceSwitch" />}
-                                    label="HSL Space ?"
-                                    className={clsx(classes.margin, classes.textField, classes.radiobuttons)}
-                                />
-                                <FormControlLabel
-                                    control={<Switch checked={polarRandom} onChange={this.handlePolarRandomSwitch}
-                                    name="polarRandomSwitch" />}
-                                    label="Polar Random"
-                                    className={clsx(classes.margin, classes.textField, classes.radiobuttons)}
-                                />
-                            </FormGroup>
+                            </Grid>
+                            <FormControlLabel
+                                control={<Switch checked={hslSpace} onChange={this.handleHSLSpaceSwitch}
+                                name="HSLSpaceSwitch" />}
+                                label="HSL Space"
+                                className={clsx(classes.margin, classes.textField, classes.radiobuttons)}
+                            />
+                            <FormControlLabel
+                                control={<Switch checked={polarRandom} onChange={this.handlePolarRandomSwitch}
+                                name="polarRandomSwitch" />}
+                                label="Polar Random"
+                                className={clsx(classes.margin, classes.textField, classes.radiobuttons)}
+                            />
                         </Grid>
                     </Grid>
                 </div>
