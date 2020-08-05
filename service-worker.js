@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "/rzevolreact/precache-manifest.5f04852d76a1a6c77fcf32f34f712ad4.js"
+  "/rzevolreact/precache-manifest.23431953ecc33de662586e3e457ae4a4.js"
 );
 
 self.addEventListener('message', (event) => {
