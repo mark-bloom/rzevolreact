@@ -1,8 +1,0 @@
-{
-    "appService.deploySubpath": ".",
-    "appService.zipIgnorePattern": [
-        "node_modules{,/**}",
-        ".vscode{,/**}"
-    ],
-    "appService.defaultWebAppToDeploy": "/subscriptions/6b12f7e2-e467-495a-bc25-ec896ca4e015/resourceGroups/rzevolreactdemo2/providers/Microsoft.Web/sites/rzevolreactdemo"
-}
