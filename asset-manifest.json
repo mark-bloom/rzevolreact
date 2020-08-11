@@ -1,14 +1,14 @@
 {
   "files": {
     "main.css": "/rzevolreact/static/css/main.a4392227.chunk.css",
-    "main.js": "/rzevolreact/static/js/main.9d21b492.chunk.js",
-    "main.js.map": "/rzevolreact/static/js/main.9d21b492.chunk.js.map",
+    "main.js": "/rzevolreact/static/js/main.7afa3154.chunk.js",
+    "main.js.map": "/rzevolreact/static/js/main.7afa3154.chunk.js.map",
     "runtime-main.js": "/rzevolreact/static/js/runtime-main.25cf71ab.js",
     "runtime-main.js.map": "/rzevolreact/static/js/runtime-main.25cf71ab.js.map",
     "static/js/2.e35e779d.chunk.js": "/rzevolreact/static/js/2.e35e779d.chunk.js",
     "static/js/2.e35e779d.chunk.js.map": "/rzevolreact/static/js/2.e35e779d.chunk.js.map",
     "index.html": "/rzevolreact/index.html",
-    "precache-manifest.15ab1cc35010af87dbaae6e8f86a2e61.js": "/rzevolreact/precache-manifest.15ab1cc35010af87dbaae6e8f86a2e61.js",
+    "precache-manifest.71f9bef7fd32b9d655ea0e8d849ad187.js": "/rzevolreact/precache-manifest.71f9bef7fd32b9d655ea0e8d849ad187.js",
     "service-worker.js": "/rzevolreact/service-worker.js",
     "static/css/main.a4392227.chunk.css.map": "/rzevolreact/static/css/main.a4392227.chunk.css.map",
     "static/js/2.e35e779d.chunk.js.LICENSE.txt": "/rzevolreact/static/js/2.e35e779d.chunk.js.LICENSE.txt",
@@ -18,6 +18,6 @@
     "static/js/runtime-main.25cf71ab.js",
     "static/js/2.e35e779d.chunk.js",
     "static/css/main.a4392227.chunk.css",
-    "static/js/main.9d21b492.chunk.js"
+    "static/js/main.7afa3154.chunk.js"
   ]
 }
