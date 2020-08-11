@@ -334,6 +334,16 @@ class Game extends React.Component {
         return (output - stdDev*skew);
       }
 
+      randn_CLT(stdDev, skew) { // ALTERNATE RANDOM FOR TESTING
+        var rand = 0;
+        for (var i = 0; i < 6; i += 1) {
+          rand += Math.random();
+        }
+        rand = rand / 6;
+        rand = (rand - skew) * stdDev;
+        return rand;
+      }
+
     randn_bmDeath(meanDeath) {
         let min = meanDeath * 0.5;
         let max = meanDeath * 1.5;
@@ -483,7 +493,7 @@ class Game extends React.Component {
 
     handleRGBMutChange = (event) => {
         let rgbChange = event.target.value;
-        this.setState({ displayRGBmutate: rgbChange });
+        this.setState({ displayRGBMutate: rgbChange });
         if(rgbChange >= 0 && rgbChange <= 1 && !isNaN(rgbChange)) {
             this.stopGame();
             this.setState({ rgbMutate: rgbChange });
@@ -697,16 +707,6 @@ class Game extends React.Component {
                                     variant="outlined"
                                 />
                             </Grid>
-                            {/* <Grid item>
-                                <TextField 
-                                    label="Death % [0,100]"
-                                    id="outlined-adornment-deathChance"
-                                    className={clsx(classes.margin, classes.textField)}
-                                    onChange={this.handleDeathChange}
-                                    value={displayDeathChance}
-                                    variant="outlined"
-                                />
-                            </Grid> */}
                             <Grid item>
                                 <TextField
                                     label="HSL Sat+ Bias [0,1]"
