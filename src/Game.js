@@ -35,8 +35,8 @@ const MUTATE_NEIGHBOUR = 0.003;
 
 const MEAN_DEATH = 100;
 
-const DEFAULT_RGB_BIAS = 0.4;
-const DEFAULT_HSL_BIAS= 0.4;
+const DEFAULT_RGB_BIAS = 0.1;
+const DEFAULT_HSL_BIAS= 0.25;
 
 const HSL_SPACE = false;
 const POLAR_RAND = true;
@@ -176,15 +176,15 @@ class Game extends React.Component {
                     }
                 } else { // if dead, chance to wake and/or mutate
                     // get data about neighbours (numbers and colors)
-                    let neighbourData = this.calculateneighbours(x, y);
-                    let neighbourCount = neighbourData[0];
-                    // neighbours impacts mutation chance
                     if ( mutationRoll <= mutateChance ) {
                         this.wakeCell(y, x);
-                    } else if ( mutationRoll <= (mutateChance + (neighbourMutateChance*neighbourCount)) ) {
-                        board[0][0].data = board[y][x].alive;
-                        board[0][1].data = board[y][x].x+ " " +board[y][x].y;
-                        this.mutateCell(y, x, neighbourData);
+                    // neighbours impacts mutation chance
+                    } else  {
+                        let neighbourData = this.calculateneighbours(x, y);
+                        let neighbourCount = neighbourData[0];
+                        if ( mutationRoll <= (mutateChance + (neighbourMutateChance*neighbourCount)) ) {
+                            this.mutateCell(y, x, neighbourData);
+                        };
                     }
                 }
             }
@@ -279,11 +279,11 @@ class Game extends React.Component {
             // Seperately handle H, S, L
             if (polarRandom) {
                 tempHSL[0] += (inputColor[0] + this.randn_bmPolar(stdDev, 0.5));
-                tempHSL[1] += (inputColor[1] + this.randn_bmPolar(stdDev/2, hslMutate));
+                tempHSL[1] += (inputColor[1] + this.randn_bmPolar(stdDev, hslMutate));
                 tempHSL[2] += (inputColor[2] + this.randn_bmPolar(stdDev/6, 0.5));
             } else {
                 tempHSL[0] += (inputColor[0] + this.randn_bm(stdDev, 0.5));
-                tempHSL[1] += (inputColor[1] + this.randn_bmPolar(stdDev/2, hslMutate));
+                tempHSL[1] += (inputColor[1] + this.randn_bmPolar(stdDev, hslMutate));
                 tempHSL[2] += (inputColor[2] + this.randn_bm(stdDev/6, 0.5));
             }
             if (tempHSL[0] > 360) tempHSL[0] = 360;
@@ -317,7 +317,7 @@ class Game extends React.Component {
     
         num = num / 10.0 + 0.5; // Translate to 0 -> 1
         if (num > 1 || num < 0) num = this.randn_bm(); // resample between 0 and 1 if out of range
-        num -= skew;
+        num -= (0.5 - skew);
         num *= (10 * stdDev); // Stretch to fill range
         return num;
     }
@@ -330,18 +330,8 @@ class Game extends React.Component {
           w = u*u + v*v;
         }
         w = Math.sqrt( -2.0 * Math.log( w ) / w);
-        let output = (u * w) * stdDev;
-        return (output - stdDev*skew);
-      }
-
-      randn_CLT(stdDev, skew) { // ALTERNATE RANDOM FOR TESTING
-        var rand = 0;
-        for (var i = 0; i < 6; i += 1) {
-          rand += Math.random();
-        }
-        rand = rand / 6;
-        rand = (rand - skew) * stdDev;
-        return rand;
+        let output = (u * w) - (0.5 - skew);
+        return (output * stdDev);
       }
 
     randn_bmDeath(meanDeath) {
@@ -494,7 +484,7 @@ class Game extends React.Component {
     handleRGBMutChange = (event) => {
         let rgbChange = event.target.value;
         this.setState({ displayRGBMutate: rgbChange });
-        if(rgbChange >= 0 && rgbChange <= 1 && !isNaN(rgbChange)) {
+        if(rgbChange >= -0.5 && rgbChange <= 0.5 && !isNaN(rgbChange)) {
             this.stopGame();
             this.setState({ rgbMutate: rgbChange });
         }
@@ -639,7 +629,7 @@ class Game extends React.Component {
                         <Grid className="Controls2" container spacing={1} justify="center">
                             <Grid item>
                                 <TextField
-                                    label="Interval speed [20,∞]"
+                                    label="Interval speed [20, ∞]"
                                     id="outlined-adornment-interval"
                                     className={clsx(classes.margin, classes.textField)}
                                     onChange={this.handleIntervalChange}
@@ -653,7 +643,7 @@ class Game extends React.Component {
                             </Grid>
                             <Grid item>
                                 <TextField 
-                                    label="Colour Deviation [0,∞]"
+                                    label="Colour Deviation [0, ∞]"
                                     id="outlined-adornment-stdDevColor"
                                     className={clsx(classes.margin, classes.textField)}
                                     onChange={this.handleStdDevChange}
@@ -663,7 +653,7 @@ class Game extends React.Component {
                             </Grid>
                             <Grid item>
                                 <TextField
-                                    label="Board size [4,100]"
+                                    label={"Board Size [4,100]"}
                                     id="outlined-adornment-size"
                                     className={clsx(classes.margin, classes.textField)}
                                     onChange={this.handleSizeChange}
@@ -677,7 +667,7 @@ class Game extends React.Component {
                             </Grid>
                             <Grid item>
                             <TextField
-                                    label="RGB Col. Bias [0,1]"
+                                    label="RGB Col. Bias [-0.5, 0.5]"
                                     id="outlined-adornment-size"
                                     className={clsx(classes.margin, classes.textField)}
                                     onChange={this.handleRGBMutChange}
@@ -689,7 +679,7 @@ class Game extends React.Component {
                         <Grid className="Controls2" container spacing={1} justify="center">
                         <Grid item >
                                 <TextField 
-                                    label="Mutate % [0,100]"
+                                    label="Base Wake % [0, 100]"
                                     id="outlined-adornment-mutationChance"
                                     className={clsx(classes.margin, classes.textField)}
                                     onChange={this.handleMutateChange}
@@ -699,7 +689,7 @@ class Game extends React.Component {
                             </Grid>
                             <Grid item>
                                 <TextField 
-                                    label="Neighbour + % [0,100]"
+                                    label="Neighbour + % [0, 100]"
                                     id="outlined-adornment-neighbourMutationChance"
                                     className={clsx(classes.margin, classes.textField)}
                                     onChange={this.handleNieghbourMutatChange}
@@ -709,7 +699,7 @@ class Game extends React.Component {
                             </Grid>
                             <Grid item>
                                 <TextField
-                                    label="HSL Sat+ Bias [0,1]"
+                                    label="HSL Sat+ Bias [-0.5, 0.5]"
                                     id="outlined-adornment-size"
                                     className={clsx(classes.margin, classes.textField)}
                                     onChange={this.handleHSLMutChange}
